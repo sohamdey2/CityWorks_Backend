@@ -12,7 +12,7 @@ public interface TaskService {
     TaskResponseDTO findTaskById(Long id);
     Task findTaskEntityById(Long id);
     List<TaskResponseDTO> findAllTasks();
-    Task updateTaskById(Long id, UpdateTaskDto dto);
+    TaskResponseDTO updateTaskById(Long id, UpdateTaskDto dto);
     void deleteTask(Long id);
     List<TaskResponseDTO> findTaskByWorkerId(Long workerId);
 }

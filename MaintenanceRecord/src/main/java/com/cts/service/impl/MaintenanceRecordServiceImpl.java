@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.cts.aspect.audit.Auditable;
@@ -15,11 +12,13 @@ import com.cts.dto.response.MaintenanceRecordResponseDTO;
 import com.cts.entity.MaintenanceRecord;
 import com.cts.enums.MaintenanceStatus;
 import com.cts.exception.ResourceNotFoundException;
+import com.cts.exception.ServiceUnavailableException;
 import com.cts.mapper.MaintenanceRecordMapper;
 import com.cts.repository.MaintenanceRecordRepository;
 import com.cts.service.ApiClient;
 import com.cts.service.MaintenanceRecordService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 
@@ -29,17 +28,13 @@ public class MaintenanceRecordServiceImpl implements MaintenanceRecordService {
 
 	private final MaintenanceRecordRepository maintenanceRecordRepository;
 	private final ApiClient apiClient;
-	private final Logger logger = LoggerFactory.getLogger(MaintenanceRecordServiceImpl.class);
-
-	@Autowired
-	private MaintenanceRecordMapper recordMapper;
+	private final MaintenanceRecordMapper recordMapper;
 
 	@Auditable(action = "CREATE", resourceType = "Maintenance Record")
-	@Retry(name = "MaintenanceRecord-Service", fallbackMethod = "getDefaultAssetDetails")
+	@CircuitBreaker(name = "MaintenanceRecord-Service", fallbackMethod = "getDefaultAssetDetails")
+	@Retry(name = "MaintenanceRecord-Service")
 	@Override
 	public MaintenanceRecordResponseDTO createMaintenanceRecord(CreateMaintenanceRecordRequestDTO mRecord) {
-
-		logger.info("Called Method");
 
 		apiClient.getAssetDetails(mRecord.getAssetId())
 				.orElseThrow(() -> new ResourceNotFoundException("Asset Not found id : " + mRecord.getAssetId()));
@@ -61,7 +56,7 @@ public class MaintenanceRecordServiceImpl implements MaintenanceRecordService {
 		updates.forEach((key, values) -> {
 			switch (key) {
 			case "status":
-				record.setStatus((MaintenanceStatus) values);
+				record.setStatus(MaintenanceStatus.valueOf(values.toString()));
 				break;
 			}
 		});
@@ -127,7 +122,7 @@ public class MaintenanceRecordServiceImpl implements MaintenanceRecordService {
 
 	public MaintenanceRecordResponseDTO getDefaultAssetDetails(CreateMaintenanceRecordRequestDTO mRecord,
 			Throwable exception) {
-		throw new ResourceNotFoundException("Asset Not found id : " + mRecord.getAssetId());
+		throw new ServiceUnavailableException("Asset Service Unavailable");
 	}
 
 }

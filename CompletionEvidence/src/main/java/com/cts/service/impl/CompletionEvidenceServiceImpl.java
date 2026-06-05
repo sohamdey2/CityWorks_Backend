@@ -2,6 +2,7 @@ package com.cts.service.impl;
 
 import java.util.List;
 
+
 import org.springframework.stereotype.Service;
 
 import com.cts.aspect.audit.Auditable;
@@ -11,12 +12,14 @@ import com.cts.dto.response.WorkOrderResponseDTO;
 import com.cts.entity.CompletionEvidence;
 import com.cts.enums.EvidenceStatus;
 import com.cts.exception.ResourceNotFoundException;
+import com.cts.exception.ServiceUnavailableException;
 import com.cts.mapper.CompletionEvidenceMapper;
 import com.cts.repository.CompletionEvidenceRepository;
 import com.cts.service.CompletionEvidenceService;
 import com.cts.service.TaskApiClient;
 import com.cts.service.WorkOrderApiClient;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 
@@ -29,11 +32,14 @@ public class CompletionEvidenceServiceImpl implements CompletionEvidenceService 
 	private final TaskApiClient taskApiClient;
 	private final WorkOrderApiClient workOrderApiClient;
 	
-	@Retry(name = "Completion-Service", fallbackMethod = "getDefaultWorkOrderDetails")
+	@CircuitBreaker(name = "Completion-Service", fallbackMethod = "getDefaultWorkOrderDetails")
+	@Retry(name = "Completion-Service")
 	public WorkOrderResponseDTO getWorkOrderDetails(Long id) {
 		return workOrderApiClient.getWorkOrderDetails(id).orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found"));
 	}
 
+	@CircuitBreaker(name = "Completion-Service", fallbackMethod = "getDefaultCompletionDetails")
+	@Retry(name = "Completion-Service")
 	@Auditable(action = "CREATE", resourceType = "Completion Evidence")
 	@Override
 	public CompletionEvidenceResponseDTO addCompletionEvidence(CreateCompletionEvidenceRequestDTO dto) {
@@ -91,7 +97,7 @@ public class CompletionEvidenceServiceImpl implements CompletionEvidenceService 
 	}
 	
 	public WorkOrderResponseDTO getDefaultWorkOrderDetails(Long id, Throwable throwable) {
-		throw new ResourceNotFoundException("WorkOrder Not found id : " + id);
+		throw new ServiceUnavailableException("WorkOrder Service Unavailable");
 	}
 
 	@Override
@@ -106,6 +112,10 @@ public class CompletionEvidenceServiceImpl implements CompletionEvidenceService 
 		List<CompletionEvidence> evidences = evidenceRepository.findByWorkOrderId(id);
 		List<CompletionEvidenceResponseDTO> dtos = evidences.stream().map(evidenceMapper::toResponse).toList();
 		return dtos;
+	}
+	
+	public CompletionEvidenceResponseDTO getDefaultCompletionDetails(CreateCompletionEvidenceRequestDTO dto, Throwable t) {
+		throw new ServiceUnavailableException("User Service Unavailable");
 	}
 
 }

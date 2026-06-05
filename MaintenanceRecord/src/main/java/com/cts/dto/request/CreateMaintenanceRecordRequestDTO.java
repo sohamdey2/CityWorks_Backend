@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.cts.enums.MaintenanceStatus;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
@@ -28,7 +29,7 @@ public class CreateMaintenanceRecordRequestDTO {
 	@PositiveOrZero(message = "Cost should be greater or Equal to 0")
 	private Double cost;
 	
-	@NotBlank(message = "Status should not be null")
+	@NotNull(message = "Status should not be null")
 	private MaintenanceStatus status;
 	
 	private Long assetId;

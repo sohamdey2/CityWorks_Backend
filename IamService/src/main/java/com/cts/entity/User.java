@@ -4,6 +4,7 @@ package com.cts.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "users")
@@ -19,7 +20,7 @@ public class User {
     @Column(unique = true)
     private String username;
     
-    @JsonIgnore 
+    @JsonIgnore
     private String password;
     
     @Column(unique = true, nullable = false)

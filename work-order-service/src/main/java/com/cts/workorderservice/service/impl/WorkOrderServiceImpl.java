@@ -223,4 +223,10 @@ public class WorkOrderServiceImpl {
                 "Cannot update work order status: Completion Evidence Service is "
                 + "currently unavailable. Please try again later.");
     }
+    
+    public WorkOrderResponseDTO getWorkOrderByRequestId(Long requestId) {
+    	WorkOrder order = workOrderRepository.findByRequestId(requestId).orElseThrow(() -> new ResourceNotFoundException("Not Found"));
+    	
+    	return WorkOrderMapper.toResponse(order);
+    }
 }

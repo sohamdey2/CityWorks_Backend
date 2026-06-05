@@ -33,7 +33,7 @@ public class CreateAssetInspectionRequestDTO {
 	@NotBlank(message = "URI should not be null")
 	private String photoUri;
 	
-	@NotBlank(message = "Status should not be null")
+	@NotNull(message = "Status should not be null")
 	private InspectionStatus status;
 	
 	private Long assetId;

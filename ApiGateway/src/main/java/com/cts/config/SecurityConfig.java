@@ -33,19 +33,15 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 
         return http
-                // ✅ Enable CORS (Reactive way)
+                
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // ✅ Disable CSRF
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
 
-                // ✅ Authorization rules
                 .authorizeExchange(exchanges -> exchanges
 
-                        // ✅ VERY IMPORTANT: Allow preflight requests
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // ✅ Public endpoints
                         .pathMatchers(
                                 "/api/auth/**",
                                 "/swagger-ui/index.html",
@@ -54,24 +50,19 @@ public class SecurityConfig {
                                 "/v3/api-docs",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**",
-                                "/api/notifications/**"
+                                "/webjars/**"
                         ).permitAll()
 
-                        // ✅ Example public POST
                         .pathMatchers(HttpMethod.POST, "/api/audit-logs").permitAll()
 
-                        // ✅ All others secured
                         .anyExchange().authenticated()
                 )
 
-                // ✅ JWT Filter
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
                 .build();
     }
 
-    // ✅ ✅ ✅ REACTIVE CORS CONFIG (CRITICAL FIX)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -87,7 +78,6 @@ public class SecurityConfig {
         return source;
     }
 
-    // ✅ Password encoder
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

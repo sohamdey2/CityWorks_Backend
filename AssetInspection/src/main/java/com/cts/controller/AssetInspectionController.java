@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 //import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,7 +35,7 @@ public class AssetInspectionController {
 	
 	@Autowired private AssetInspectionService assetInspectionService;
 	
-//	@PreAuthorize("hasRole('SUPERVISOR')")
+	@PreAuthorize("hasRole('SUPERVISOR')")
 	@PostMapping
 	public ResponseEntity<?> createAssetInspection(@RequestBody @Valid CreateAssetInspectionRequestDTO assetInspection){
 		AssetInspectionResponseDTO inspection = assetInspectionService.createAssetInspection(assetInspection);
@@ -47,7 +48,7 @@ public class AssetInspectionController {
 		);
 	}
 	
-//	@PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
+	@PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
 	@GetMapping
 	public ResponseEntity<?> getAllAssetInspection(){
 		List<AssetInspectionResponseDTO> inspections = assetInspectionService.getAllAssetInspection();
@@ -60,7 +61,7 @@ public class AssetInspectionController {
 				);
 	}
 	
-//	@PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
+	@PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getAssetInspectionById(@PathVariable @Positive(message = "id Should be Positive") Long id){
 		AssetInspectionResponseDTO inspection = assetInspectionService.getAssetInspectionById(id);
@@ -73,7 +74,7 @@ public class AssetInspectionController {
 				);
 	}
 	
-//	@PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
+	@PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
 	@PutMapping("/{id}")
 	public ResponseEntity<?> updateAssetInspectionById(@PathVariable @Positive(message = "id should be Positive") Long id, @RequestBody @Valid CreateAssetInspectionRequestDTO assetInspection){
 		AssetInspectionResponseDTO inspection = assetInspectionService.updateAssetInspectionById(id, assetInspection);
@@ -86,7 +87,7 @@ public class AssetInspectionController {
 				);
 	}
 	
-//	@PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
+	@PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
 	@PatchMapping("/{id}")
 	public ResponseEntity<?> updateAssetInspectionPartiallyById(@PathVariable @Positive(message = "id should be Positive") Long id, @RequestBody @Valid Map<String, Object> field){
 		AssetInspectionResponseDTO inspection = assetInspectionService.updateAssetInspectionPartiallyById(id, field);
@@ -99,7 +100,7 @@ public class AssetInspectionController {
 				);
 	}
 	
-//	@PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
+	@PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteAssetById(@PathVariable @Positive(message = "id should be Positive") Long id){
 		boolean flag = assetInspectionService.deleteAssetById(id);

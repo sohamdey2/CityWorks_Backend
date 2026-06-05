@@ -30,7 +30,6 @@ public class AuthServiceImpl implements AuthService{
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-
     public AuthServiceImpl(UserRepository userRepository,PasswordEncoder passwordEncoder,JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -130,7 +129,7 @@ public class AuthServiceImpl implements AuthService{
         user.setResetToken(null);
         userRepository.save(user);
     }
-    
+   
     public User getUserById(Long id) {
     	return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("No User Found on "+id));
     }
@@ -180,6 +179,7 @@ public class AuthServiceImpl implements AuthService{
 				.build()).toList();
 		return dto;
 	}
+	
 
 	@Override
 	public UserResponseDTO changeStatusUser(Long id,String status) {
@@ -193,6 +193,19 @@ public class AuthServiceImpl implements AuthService{
 				.username(user.getUsername())
 				.role(user.getRole())
 				.status(user.getStatus())
+				.build();
+	}
+
+	@Override
+	public UserResponseDTO getUserResponseDTOById(Long id) {
+		User user = getUserById(id);
+		return UserResponseDTO.builder()
+				.userId(id)
+				.name(user.getName())
+				.username(user.getUsername())
+				.role(user.getRole())
+				.status(user.getStatus())
+				.email(user.getEmail())
 				.build();
 	}
 	

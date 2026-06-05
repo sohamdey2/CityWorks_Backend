@@ -25,7 +25,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-
 @Builder
 public class Task{
     @Id

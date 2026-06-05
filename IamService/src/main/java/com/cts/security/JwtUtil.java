@@ -18,7 +18,7 @@ public class JwtUtil {
     private static final String SECRET =
     		"755e4400ca9b850a43dd026081259da308374e93f7e85a5b3d205036c0d9fd4c";
 
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24; // 24 hours
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 1; 
 
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
 

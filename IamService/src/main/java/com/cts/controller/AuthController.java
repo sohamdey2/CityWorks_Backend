@@ -34,9 +34,9 @@ public class AuthController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+	public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest request) {
 		authService.register(request);
-		return ResponseEntity.ok("User registered successfully");
+		return ResponseEntity.ok(Map.of("message","User registered successfully"));
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")
@@ -81,7 +81,7 @@ public class AuthController {
 		return ResponseEntity.ok(authService.getWorkerById(id));
 	}
 
-	@PreAuthorize("hasRole('SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('SUPERVISOR', 'ADMIN')")
 	@GetMapping("/users/workers/active")
 	public ResponseEntity<List<UserResponseDTO>> getAllActiveWorkers() {
 		return ResponseEntity.ok(authService.getAllActiveWorkers());
@@ -92,7 +92,13 @@ public class AuthController {
 	public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
 		return ResponseEntity.ok(authService.getAllUsers());
 	}
-
+	
+	@PreAuthorize("hasRole('ADMIN')")
+	@GetMapping("/users/{id}")
+	public ResponseEntity<UserResponseDTO> getUserResponseDTOById(@PathVariable Long id) {
+		return ResponseEntity.ok(authService.getUserResponseDTOById(id));
+	}
+	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/users/{id}/status")
 	public ResponseEntity<UserResponseDTO> changeStatusUser(@PathVariable Long id,@RequestParam String status) {

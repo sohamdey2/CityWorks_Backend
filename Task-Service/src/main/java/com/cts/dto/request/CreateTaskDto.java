@@ -3,6 +3,7 @@ package com.cts.dto.request;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 public class CreateTaskDto {
 
     @NotNull(message = "Work order ID must not be null")
+    @Positive(message = "Work order ID must be a poitive number")
     private Long workOrderId;
 
     @NotBlank(message = "Description must not be blank")
@@ -25,6 +27,7 @@ public class CreateTaskDto {
     private String description;
 
     @NotNull(message = "AssignedTo user ID must not be null")
+    @Positive(message="AssignedTo user ID must be a positive number")
     private Long assignedTo;
 
     @NotNull(message = "Due date must not be null")

@@ -1,8 +1,9 @@
 package com.cts.servicerequest.service;
 
-import com.cts.servicerequest.dto.ServiceRequestDTO;
-
 import java.util.List;
+
+import com.cts.servicerequest.dto.ServiceRequestDTO;
+import com.cts.servicerequest.enums.ServiceRequestStatus;
 
 public interface ServiceRequestService {
 
@@ -19,4 +20,6 @@ public interface ServiceRequestService {
     List<ServiceRequestDTO> getAllByCitizenId(Long citizenId);
 
     void delete(Long id);
+    
+    void updateRequestStatusById(Long requestId, ServiceRequestStatus status);
 }

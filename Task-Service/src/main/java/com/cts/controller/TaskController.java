@@ -2,7 +2,6 @@ package com.cts.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,12 +23,14 @@ import com.cts.mapper.ResponseTaskMapper;
 import com.cts.service.TaskService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
  
 @RestController
 @RequestMapping("/api/tasks")
+@RequiredArgsConstructor
 public class TaskController {
-    @Autowired
-    TaskService taskService;
+    
+    private final TaskService taskService;
  
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
@@ -71,12 +72,11 @@ public class TaskController {
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
     public ResponseEntity <ApiResponse<TaskResponseDTO>> updateTaskById(@PathVariable("id") Long id, @RequestBody @Valid UpdateTaskDto updateTaskDto){
-        Task updatedTask = taskService.updateTaskById(id, updateTaskDto);
-        TaskResponseDTO taskResponseDto = ResponseTaskMapper.toResponseDto(updatedTask);
-        return  ResponseEntity.ok(ApiResponse.<TaskResponseDTO>builder()
+        
+        return ResponseEntity.ok(ApiResponse.<TaskResponseDTO>builder()
                 .status("Success")
                 .message("Task updated successfully")
-                .data(taskResponseDto)
+                .data(taskService.updateTaskById(id, updateTaskDto))
                 .build());
     }
  

@@ -1,14 +1,27 @@
 package com.cts.servicerequest.controller;
 
-import com.cts.servicerequest.api.ApiResponse;
-import com.cts.servicerequest.dto.ServiceRequestDTO;
-import com.cts.servicerequest.service.ServiceRequestService;
-import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.cts.servicerequest.api.ApiResponse;
+import com.cts.servicerequest.dto.ServiceRequestDTO;
+import com.cts.servicerequest.enums.ServiceRequestStatus;
+import com.cts.servicerequest.service.ServiceRequestService;
+
+import jakarta.validation.Valid;
 
 /**
  * REST controller for Service Requests.
@@ -115,5 +128,12 @@ public class ServiceRequestController {
                 .status("SUCCESS")
                 .message("Service request deleted successfully")
                 .build());
+    }
+    
+    @PreAuthorize("hasRole('SUPERVISOR')")
+    @PatchMapping("/{requestId}/")
+    public ResponseEntity<Map<String,String>> updateStatusByRequestId(@PathVariable Long requestId, @RequestParam ServiceRequestStatus status){
+    	service.updateRequestStatusById(requestId, status);
+    	return ResponseEntity.ok(Map.of("message","Status updated Successful"));
     }
 }

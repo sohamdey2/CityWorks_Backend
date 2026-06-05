@@ -102,4 +102,10 @@ public class WorkOrderController {
                         "Work order status updated to " + status, data);
         return ResponseEntity.ok(response);
     }
+    @PreAuthorize("hasRole('SUPERVISOR')")
+    @GetMapping("/requestId")
+    public ResponseEntity<WorkOrderResponseDTO> getWorkOrderByRequestId(@RequestParam Long requestId){
+    	WorkOrderResponseDTO dto = workOrderService.getWorkOrderByRequestId(requestId);
+    	return ResponseEntity.ok(dto);
+    }
 }

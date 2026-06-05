@@ -33,7 +33,7 @@ public class AssetController{
 	@Autowired
 	AssetService assetService;
 	
-	@PreAuthorize("hasRole('ADMIN') or hasRole('SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR', 'CITIZEN')")
 	@GetMapping
 	public ResponseEntity<?> getAllAssets(){
 		List<AssetResponseDTO> assets = assetService.getAllAssets();

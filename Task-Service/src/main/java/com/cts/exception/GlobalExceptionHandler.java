@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.cts.api.ApiResponse;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -28,22 +29,23 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public  ResponseEntity<ApiResponse<Map<String, String>>> handleValidationException(MethodArgumentNotValidException manv){
-        Map<String, String> fieldErrors = new HashMap<>();
+	public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValidException(
+			MethodArgumentNotValidException ex) {
 
-        manv.getBindingResult()
-                .getFieldErrors()
-                .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage())
-                );
+		Map<String, String> fieldErrors = new HashMap<>();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.<Map<String, String>>builder()
-                        .status("ERROR")
-                        .message("Validation failed")
-                        .data(fieldErrors)
-                        .build());
-    }
-    
+		ex.getBindingResult().getFieldErrors().forEach(error -> {
+			fieldErrors.put(error.getField(), error.getDefaultMessage());
+		});
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("timestamp", java.time.LocalDateTime.now());
+		response.put("status", HttpStatus.BAD_REQUEST.value());
+		response.put("error", "INVALID_OPERATION");
+		response.put("message", fieldErrors);
+
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+	}    
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Map<String,String>>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -51,5 +53,18 @@ public class GlobalExceptionHandler {
                 		.status("Access Denied")
                 		.message("Access denied: you do not have permission to perform this action")
                 		.build());
+    }
+    @ExceptionHandler(InvalidFormatException.class)
+    public ResponseEntity<ApiResponse<Object>> handleInvalidFormat(InvalidFormatException ex) {
+        String field = ex.getPath().isEmpty()
+                ? "field"
+                : ex.getPath().get(ex.getPath().size() - 1).getFieldName();
+        return ResponseEntity.badRequest().body(
+            ApiResponse.builder()
+                .status("ERROR")
+                .message(field + " has an invalid value: '" + ex.getValue() + "'")
+                .data(null)
+                .build()
+        );
     }
 }

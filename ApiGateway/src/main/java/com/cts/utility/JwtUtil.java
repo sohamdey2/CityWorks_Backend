@@ -1,6 +1,7 @@
 package com.cts.utility;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -12,9 +13,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-	private final String SECRET_KEY = "755e4400ca9b850a43dd026081259da308374e93f7e85a5b3d205036c0d9fd4c"; // Must be at
-																											// least 32
-																											// bytes
+	private final String SECRET_KEY = "755e4400ca9b850a43dd026081259da308374e93f7e85a5b3d205036c0d9fd4c";
+																											
 	private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
 	public String extractUsername(String token) {
@@ -23,7 +23,7 @@ public class JwtUtil {
 
 	public String generateToken(String username, String role) {
 		return Jwts.builder().setSubject(username).claim("role", role).setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 1)) // 10 hours
+				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 1))
 				.signWith(key, SignatureAlgorithm.HS256).compact();
 	}
 
@@ -36,6 +36,10 @@ public class JwtUtil {
 	}
 
 	public boolean isTokenValid(String token) {
-		return !extractClaims(token).getExpiration().before(new Date());
+		try { 
+			return !extractClaims(token).getExpiration().before(new Date());
+			} catch(JwtException | IllegalArgumentException e) {
+				return false;
+			}
 	}
 }

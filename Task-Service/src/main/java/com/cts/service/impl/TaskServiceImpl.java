@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cts.aspect.audit.Auditable;
 import com.cts.dto.request.CreateTaskDto;
 import com.cts.dto.request.UpdateTaskDto;
 import com.cts.dto.response.TaskResponseDTO;
@@ -21,19 +22,23 @@ import com.cts.service.WorkerClient;
 
 import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
  
 @Service
+@RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
-    @Autowired
-    TaskRepository taskRepository;
+
+    private final TaskRepository taskRepository;
  
-    @Autowired
-    WorkOrderClient workOrderClient;
- 
-    @Autowired
-    WorkerClient workerClient;
+    private final WorkOrderClient workOrderClient;
+
+    private final WorkerClient workerClient;
+    
+    @Auditable(action = "CREATE", resourceType = "TASK")
     @CircuitBreaker(name="Task-Service", fallbackMethod = "handleFallback")
+    @Retry(name="Task-Service")
     @Override
     public TaskResponseDTO createTask(CreateTaskDto createTaskDto) {
         workOrderClient.getWorkOrder(createTaskDto.getWorkOrderId()).orElseThrow(()-> new ResourceNotFoundException("Work order with id " + createTaskDto.getWorkOrderId() + " not found"));
@@ -45,14 +50,13 @@ public class TaskServiceImpl implements TaskService {
  
         return ResponseTaskMapper.toResponseDto(task);
     }
- 
+  
     @Override
     public TaskResponseDTO findTaskById(Long id){
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task with id " + id + " not found"));
         return ResponseTaskMapper.toResponseDto(task);
     }
- 
- 
+    
     @Override
     public Task findTaskEntityById(Long id) {
         return taskRepository.findByTaskIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Task with id " + id + " not found"));
@@ -65,15 +69,25 @@ public class TaskServiceImpl implements TaskService {
         return ResponseTaskMapper.toResponseDtoList(tasks);
     }
  
+    @Auditable(action = "UPDATE", resourceType = "TASK")
+    @CircuitBreaker(name="Task-Service", fallbackMethod = "handleUpdateFallback")
     @Override
-    public Task updateTaskById(Long id, UpdateTaskDto dto){
+    public TaskResponseDTO updateTaskById(Long id, UpdateTaskDto dto){
  
         Task existingTask = findTaskEntityById(id);
+        if(dto.getAssignedTo() != null) {
+            workerClient.getWorker(dto.getAssignedTo());
+        }
+        if(dto.getWorkOrderId() != null) {
+        	workOrderClient.getWorkOrder(dto.getWorkOrderId()).orElseThrow(()-> new ResourceNotFoundException("Work order with id " + dto.getWorkOrderId() + " not found"));
+        }
         UpdateTaskMapper.toEntity(existingTask, dto);
  
-        return taskRepository.save(existingTask);
+        return ResponseTaskMapper.toResponseDto(taskRepository.save(existingTask));
     }
- 
+    //How to tackle empty string for workorder
+    //Why is 500 error is coming for invalid token
+    @Auditable(action = "DELETE", resourceType = "TASK")
     @Override
     @Transactional
     public void deleteTask(Long id) {
@@ -122,14 +136,52 @@ public class TaskServiceImpl implements TaskService {
         throw new ServiceUnavailableException(
                 "Task service is currently unavailable. Cause: " + e.getClass().getSimpleName());
     }
+    
+    public TaskResponseDTO handleUpdateFallback(Long id, UpdateTaskDto dto, Throwable e) {
+        System.out.println("Fallback triggered with exception: " + e.getClass().getName() + " - " + e.getMessage());
+        System.out.println("Exception cause: " + (e.getCause() != null ? e.getCause().getClass().getName() : "null"));
+ 
+        // Check if it's a NoFallbackAvailableException and extract the cause
+        Throwable cause = e.getCause();
+        if (cause != null && cause instanceof FeignException feignEx) {
+            System.out.println("Root cause FeignException status: " + feignEx.status());
+            if (feignEx.status() == 404) {
+                // Check which service failed - Worker or WorkOrder
+                if (feignEx.request() != null && feignEx.request().url().contains("/users/workers/")) {
+                    throw new ResourceNotFoundException(
+                            "Worker with id " + dto.getAssignedTo() + " not found");
+                } else if (feignEx.request() != null && feignEx.request().url().contains("/workorders/")) {
+                    throw new ResourceNotFoundException(
+                            "Work order with id " + dto.getWorkOrderId() + " not found");
+                }
+            }
+        }
+ 
+        // Handle direct FeignException
+        if (e instanceof FeignException feignEx) {
+            System.out.println("Direct FeignException status: " + feignEx.status());
+            if (feignEx.status() == 404) {
+                if (feignEx.request() != null && feignEx.request().url().contains("/users/workers/")) {
+                    throw new ResourceNotFoundException(
+                            "Worker with id " + dto.getAssignedTo() + " not found");
+                } else if (feignEx.request() != null && feignEx.request().url().contains("/workorders/")) {
+                    throw new ResourceNotFoundException(
+                            "Work order with id " + dto.getWorkOrderId() + " not found");
+                }
+            }
+        }
+ 
+        throw new ServiceUnavailableException(
+                "Task service is currently unavailable. Cause: " + e.getClass().getSimpleName());
+    }
 
+    
 	@Override
 	public List<TaskResponseDTO> findTaskByWorkerId(Long workerId) {
 		List<Task> tasks = taskRepository.findAllByAssignedTo(workerId);
 		if(tasks.isEmpty()) {
 			throw new ResourceNotFoundException("No Task For this Worker");
 		}
-		List<TaskResponseDTO> dtos = ResponseTaskMapper.toResponseDtoList(tasks);
-		return dtos;
+		return ResponseTaskMapper.toResponseDtoList(tasks);
 	}
 }

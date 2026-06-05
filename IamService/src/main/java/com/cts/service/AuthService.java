@@ -19,6 +19,7 @@ public interface AuthService {
 	public abstract void adminRegisterUser(RegisterRequest request);
 	CitizenResponseDto getCitizenById(Long citizenId);
 	UserResponseDTO getWorkerById(Long id);
+	UserResponseDTO getUserResponseDTOById(Long id);
 	List<UserResponseDTO> getAllActiveWorkers();
 	List<UserResponseDTO> getAllUsers();
 	UserResponseDTO changeStatusUser(Long id,String status);
