@@ -1,5 +1,6 @@
-package com.cts.config;
+//this config secures a reactive WebFlux API with JWT-based authentication, allows certain public endpoints, supports Angular frontend requests via CORS, and enforces authentication everywhere else.
 
+package com.cts.config;
 
 import java.util.List;
 
@@ -20,8 +21,8 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import com.cts.utility.JwtAuthenticationFilter;
 
 @Configuration
-@EnableWebFluxSecurity
-public class SecurityConfig {
+@EnableWebFluxSecurity // Allows reactive webflux security
+public class SecurityConfig { 
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -30,7 +31,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) { // Jwt authentication, public endpoints, CORS
 
         return http
                 
@@ -50,7 +51,8 @@ public class SecurityConfig {
                                 "/v3/api-docs",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/actuator/**"
                         ).permitAll()
 
                         .pathMatchers(HttpMethod.POST, "/api/audit-logs").permitAll()
@@ -63,8 +65,8 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    @Bean //supports Angular frontend requests via CORS
+    public CorsConfigurationSource corsConfigurationSource() { 
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);

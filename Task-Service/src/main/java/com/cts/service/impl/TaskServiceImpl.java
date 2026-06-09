@@ -41,7 +41,7 @@ public class TaskServiceImpl implements TaskService {
     @Retry(name="Task-Service")
     @Override
     public TaskResponseDTO createTask(CreateTaskDto createTaskDto) {
-        workOrderClient.getWorkOrder(createTaskDto.getWorkOrderId()).orElseThrow(()-> new ResourceNotFoundException("Work order with id " + createTaskDto.getWorkOrderId() + " not found"));
+        workOrderClient.getWorkOrder(createTaskDto.getWorkOrderId());
  
         workerClient.getWorker(createTaskDto.getAssignedTo());
  
@@ -53,7 +53,7 @@ public class TaskServiceImpl implements TaskService {
   
     @Override
     public TaskResponseDTO findTaskById(Long id){
-        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task with id " + id + " not found"));
+        Task task = taskRepository.findByTaskIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Task with id " + id + " not found"));
         return ResponseTaskMapper.toResponseDto(task);
     }
     
@@ -79,14 +79,13 @@ public class TaskServiceImpl implements TaskService {
             workerClient.getWorker(dto.getAssignedTo());
         }
         if(dto.getWorkOrderId() != null) {
-        	workOrderClient.getWorkOrder(dto.getWorkOrderId()).orElseThrow(()-> new ResourceNotFoundException("Work order with id " + dto.getWorkOrderId() + " not found"));
+        	workOrderClient.getWorkOrder(dto.getWorkOrderId());
         }
         UpdateTaskMapper.toEntity(existingTask, dto);
  
         return ResponseTaskMapper.toResponseDto(taskRepository.save(existingTask));
     }
-    //How to tackle empty string for workorder
-    //Why is 500 error is coming for invalid token
+
     @Auditable(action = "DELETE", resourceType = "TASK")
     @Override
     @Transactional

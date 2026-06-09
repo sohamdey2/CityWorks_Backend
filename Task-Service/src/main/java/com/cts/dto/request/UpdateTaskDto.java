@@ -7,22 +7,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-
-import com.cts.deserializer.EmptyStringToNullLongDeserializer;
+import com.cts.deserializer.StrictLongDeserializer;
 import com.cts.enums.TaskStatus;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Getter
 @Setter
 public class UpdateTaskDto {
-	@JsonDeserialize(using = EmptyStringToNullLongDeserializer.class)
+	@JsonDeserialize(using = StrictLongDeserializer.class)
 	@Positive(message = "Work order ID must be positive")
     private Long workOrderId;
 
-    @Size(max = 255, message = "Description must not exceed 255 characters")
+    @Size(min = 10, max = 255, message = "Description must be between 10 and 255 characters")
     private String description;
     
-    @JsonDeserialize(using = EmptyStringToNullLongDeserializer.class)
+    @JsonDeserialize(using = StrictLongDeserializer.class)
     @Positive(message = "AssignedTo user ID must be a positive number")
     private Long assignedTo;
 

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
-public class EmptyStringToNullLongDeserializer extends JsonDeserializer<Long>{
+public class StrictLongDeserializer extends JsonDeserializer<Long>{
 
 	@Override
 	public Long deserialize(JsonParser p, DeserializationContext ctxt) throws IOException{
@@ -16,7 +16,12 @@ public class EmptyStringToNullLongDeserializer extends JsonDeserializer<Long>{
 		if (value.isEmpty()) {
 			throw new InvalidFormatException(p, "workOrderId cannot be empty string", value, Long.class);
 		}
-		return Long.parseLong(value);
+		try {
+			return Long.parseLong(value);
+		} catch (NumberFormatException ex) {
+			throw new InvalidFormatException(p, "must be a valid number", value, Long.class);
+		}
+		
 	}
 
 }

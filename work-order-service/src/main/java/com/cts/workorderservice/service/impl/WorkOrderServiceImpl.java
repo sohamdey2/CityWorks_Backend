@@ -188,7 +188,7 @@ public class WorkOrderServiceImpl {
         if (WorkOrderStatus.COMPLETED.equals(newStatus)) {
             ApiResponse<List<CompletionEvidenceResponseDTO>> evidenceList;
             try {
-                evidenceList = evidenceClient.getEvidenceByWorkOrderId(orderId,"VERIFIED");
+                evidenceList = evidenceClient.getEvidenceByWorkOrderId(orderId, "VERIFIED");
             } catch (Exception e) {
                 throw new InvalidOperationException(
                         "Cannot mark work order as COMPLETED: unable to verify "

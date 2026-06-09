@@ -19,11 +19,11 @@ import java.time.LocalDateTime;
 public class CreateTaskDto {
 
     @NotNull(message = "Work order ID must not be null")
-    @Positive(message = "Work order ID must be a poitive number")
+    @Positive(message = "Work order ID must be a positive number")
     private Long workOrderId;
 
     @NotBlank(message = "Description must not be blank")
-    @Size(max = 255, message = "Description must not exceed 255 characters")
+    @Size(min = 10, max = 255, message = "Description must be between 10 and 255 characters")
     private String description;
 
     @NotNull(message = "AssignedTo user ID must not be null")

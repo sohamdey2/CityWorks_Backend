@@ -56,7 +56,7 @@ public class TaskController {
     }
  
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR', 'WORKER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<ApiResponse<List<TaskResponseDTO>>> getAllTasks() {
         List<TaskResponseDTO> tasksDto = taskService.findAllTasks();
  
@@ -67,6 +67,19 @@ public class TaskController {
                         .data(tasksDto)
                         .build()
         );
+    }
+    
+    @GetMapping("/worker/{workerId}")
+    @PreAuthorize("hasRole('WORKER')")
+    public ResponseEntity<ApiResponse<List<TaskResponseDTO>>> findTaskByWorkerId(@PathVariable("workerId") Long workerId){
+    	List<TaskResponseDTO> taskDto = taskService.findTaskByWorkerId(workerId);
+    	return ResponseEntity.ok(
+    			ApiResponse.<List<TaskResponseDTO>>builder()
+    			.status("Success")
+    			.message("Task retrieved successfully for worker")
+    			.data(taskDto)
+    			.build()
+    	);
     }
  
     @PatchMapping("/{id}")
@@ -93,4 +106,5 @@ public class TaskController {
                         .build()
         );
     }
+    
 }
