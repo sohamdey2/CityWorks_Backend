@@ -99,13 +99,10 @@ public class TaskServiceImpl implements TaskService {
     }
  
     public TaskResponseDTO handleFallback(CreateTaskDto createTaskDto, Throwable e) {
-        System.out.println("Fallback triggered with exception: " + e.getClass().getName() + " - " + e.getMessage());
-        System.out.println("Exception cause: " + (e.getCause() != null ? e.getCause().getClass().getName() : "null"));
- 
+
         // Check if it's a NoFallbackAvailableException and extract the cause
         Throwable cause = e.getCause();
         if (cause != null && cause instanceof FeignException feignEx) {
-            System.out.println("Root cause FeignException status: " + feignEx.status());
             if (feignEx.status() == 404) {
                 // Check which service failed - Worker or WorkOrder
                 if (feignEx.request() != null && feignEx.request().url().contains("/users/workers/")) {
@@ -120,7 +117,6 @@ public class TaskServiceImpl implements TaskService {
  
         // Handle direct FeignException
         if (e instanceof FeignException feignEx) {
-            System.out.println("Direct FeignException status: " + feignEx.status());
             if (feignEx.status() == 404) {
                 if (feignEx.request() != null && feignEx.request().url().contains("/users/workers/")) {
                     throw new ResourceNotFoundException(

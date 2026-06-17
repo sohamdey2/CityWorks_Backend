@@ -18,8 +18,6 @@ import com.cts.api.ApiResponse;
 import com.cts.dto.request.CreateTaskDto;
 import com.cts.dto.request.UpdateTaskDto;
 import com.cts.dto.response.TaskResponseDTO;
-import com.cts.entity.Task;
-import com.cts.mapper.ResponseTaskMapper;
 import com.cts.service.TaskService;
 
 import jakarta.validation.Valid;
@@ -46,7 +44,7 @@ public class TaskController {
  
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR', 'WORKER')")
-    public ResponseEntity <ApiResponse<TaskResponseDTO>> findTaskById(@PathVariable("id") Long id){
+    public ResponseEntity <ApiResponse<TaskResponseDTO>> findTaskById(@PathVariable Long id){
         TaskResponseDTO taskResponseDto = taskService.findTaskById(id);
         return ResponseEntity.ok(ApiResponse.<TaskResponseDTO>builder()
                 .status("Success")
@@ -84,7 +82,7 @@ public class TaskController {
  
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
-    public ResponseEntity <ApiResponse<TaskResponseDTO>> updateTaskById(@PathVariable("id") Long id, @RequestBody @Valid UpdateTaskDto updateTaskDto){
+    public ResponseEntity <ApiResponse<TaskResponseDTO>> updateTaskById(@PathVariable Long id, @RequestBody @Valid UpdateTaskDto updateTaskDto){
         
         return ResponseEntity.ok(ApiResponse.<TaskResponseDTO>builder()
                 .status("Success")

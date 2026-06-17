@@ -1,5 +1,3 @@
-//this config secures a reactive WebFlux API with JWT-based authentication, allows certain public endpoints, supports Angular frontend requests via CORS, and enforces authentication everywhere else.
-
 package com.cts.config;
 
 import java.util.List;
@@ -30,9 +28,8 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
-    @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) { // Jwt authentication, public endpoints, CORS
-
+    @Bean // Jwt authentication, public endpoints, CORS
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) { 
         return http
                 
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
